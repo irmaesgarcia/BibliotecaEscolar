@@ -43,30 +43,62 @@ class Libro {
     }
 }
 
+// --- CLASE BASE (SUPERCLASE) ---
 class Usuario {
-    private String idUsuario;
-    private String nombre;
-    private String tipo;
+    protected String idUsuario;
+    protected String nombre;
 
-    public Usuario(String idUsuario, String nombre, String tipo) {
+    public Usuario(String idUsuario, String nombre) {
         this.idUsuario = idUsuario;
         this.nombre = nombre;
-        this.tipo = tipo;
     }
 
     public String getIdUsuario() { return idUsuario; }
     public String getNombre() { return nombre; }
-    public String getTipo() { return tipo; }
 
     @Override
     public String toString() {
-        return "Usuario [ID=" + idUsuario + ", Nombre=" + nombre + ", Tipo=" + tipo + "]";
+        return "ID=" + idUsuario + ", Nombre=" + nombre;
+    }
+}
+
+// --- CLASE DERIVADA 1 (HEREDA DE Usuario) ---
+class Estudiante extends Usuario {
+    private String grado;
+
+    public Estudiante(String idUsuario, String nombre, String grado) {
+        super(idUsuario, nombre); // Reutiliza el constructor de la clase base
+        this.grado = grado;
+    }
+
+    public String getGrado() { return grado; }
+
+    @Override
+    public String toString() {
+        return "Estudiante [" + super.toString() + ", Grado=" + grado + "]";
+    }
+}
+
+// --- CLASE DERIVADA 2 (HEREDA DE Usuario) ---
+class Profesor extends Usuario {
+    private String departamento;
+
+    public Profesor(String idUsuario, String nombre, String departamento) {
+        super(idUsuario, nombre); // Reutiliza el constructor de la clase base
+        this.departamento = departamento;
+    }
+
+    public String getDepartamento() { return departamento; }
+
+    @Override
+    public String toString() {
+        return "Profesor [" + super.toString() + ", Departamento=" + departamento + "]";
     }
 }
 
 class Prestamo {
     private Libro libro;
-    private Usuario usuario;
+    private Usuario usuario; // Polimorfismo: acepta Estudiante o Profesor
     private LocalDate fechaDevolucion;
     private boolean activo;
 
@@ -128,13 +160,14 @@ public class Main {
 
     private static void inicializarDatosPrueba() {
         libros.add(new Libro("978-987-1", "Cien años de soledad", "Gabriel García Márquez", 3));
-        usuarios.add(new Usuario("U001", "Ana Pérez", "Estudiante"));
+        usuarios.add(new Estudiante("U001", "Ana Pérez", "5to Semestre"));
+        usuarios.add(new Profesor("P001", "Carlos Ruiz", "Matemáticas"));
     }
 
     private static void mostrarMenu() {
-        System.out.println("\n--- SISTEMA DE BIBLIOTECA ESCOLAR ---");
+        System.out.println("\n--- SISTEMA DE BIBLIOTECA ESCOLAR (CON HERENCIA) ---");
         System.out.println("1. Registrar nuevo libro");
-        System.out.println("2. Registrar nuevo usuario");
+        System.out.println("2. Registrar nuevo usuario (Estudiante/Profesor)");
         System.out.println("3. Realizar préstamo");
         System.out.println("4. Registrar devolución");
         System.out.println("5. Listar libros");
@@ -154,11 +187,21 @@ public class Main {
     }
 
     private static void registrarUsuario() {
-        System.out.print("ID Usuario (ej. U002): "); String id = scanner.nextLine();
-        System.out.print("Nombre: "); String nombre = scanner.nextLine();
-        System.out.print("Tipo (Estudiante/Profesor): "); String tipo = scanner.nextLine();
-        usuarios.add(new Usuario(id, nombre, tipo));
-        System.out.println("¡Usuario registrado con éxito!");
+        System.out.print("¿Qué tipo de usuario desea registrar? (1. Estudiante / 2. Profesor): ");
+        String tipo = scanner.nextLine();
+
+        System.out.print("ID del usuario (ej. U002 o P002): "); String id = scanner.nextLine();
+        System.out.print("Nombre completo: "); String nombre = scanner.nextLine();
+
+        if (tipo.equals("1")) {
+            System.out.print("Grado o Semestre: "); String grado = scanner.nextLine();
+            usuarios.add(new Estudiante(id, nombre, grado));
+            System.out.println("¡Estudiante registrado con éxito!");
+        } else {
+            System.out.print("Departamento académico: "); String depto = scanner.nextLine();
+            usuarios.add(new Profesor(id, nombre, depto));
+            System.out.println("¡Profesor registrado con éxito!");
+        }
     }
 
     private static void realizarPrestamo() {
@@ -172,7 +215,7 @@ public class Main {
 
         if (u != null && l != null && l.prestarEjemplar()) {
             prestamos.add(new Prestamo(l, u));
-            System.out.println("¡Préstamo realizado exitosamente!");
+            System.out.println("¡Préstamo realizado exitosamente a " + u.getNombre() + "!");
         } else {
             System.out.println("Error: No se pudo realizar el préstamo (verifique datos o stock).");
         }
